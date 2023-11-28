@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ISP Management</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    form {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>ISP Management System</h1>
+
+  <form id="customerForm">
+    <label for="name">Name:</label>
+    <input type="text" id="name" required>
+
+    <label for="phoneNumber">Phone Number:</label>
+    <input type="tel" id="phoneNumber" required>
+
+    <label for="address">Address:</label>
+    <input type="text" id="address" required>
+
+    <label for="billingDetails">Billing Details:</label>
+    <input type="text" id="billingDetails" required>
+
+    <label for="internetPlan">Internet Plan:</label>
+    <select id="internetPlan" required>
+      <option value="50 Mbps Unlimited">50 Mbps Unlimited</option>
+      <option value="30 Mbps Unlimited">30 Mbps Unlimited</option>
+    </select>
+
+    <button type="button" onclick="addCustomer()">Add Customer</button>
+  </form>
+
+  <div id="userList">
+    <h2>User List</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Phone Number</th>
+          <th>Address</th>
+          <th>Billing Details</th>
+          <th>Internet Plan</th>
+          <th>Email</th>
+          <th>Registration Time (IST)</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="customerTableBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      loadCustomerData();
+    });
+
+    function addCustomer() {
+      var name = document.getElementById('name').value;
+      var phoneNumber = document.getElementById('phoneNumber').value;
+      var address = document.getElementById('address').value;
+      var billingDetails = document.getElementById('billingDetails').value;
+      var internetPlan = document.getElementById('internetPlan').value;
+      var currentTimeIST = new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
+      var email = 'user' + Date.now() + '@isp.com';
+
+      var newRow = document.createElement('tr');
+      newRow.innerHTML = `
+        <td>${name}</td>
+        <td>${phoneNumber}</td>
+        <td>${address}</td>
+        <td>${billingDetails}</td>
+        <td>${internetPlan}</td>
+        <td>${email}</td>
+        <td>${currentTimeIST}</td>
+        <td><button onclick="editCustomer(this)">Edit</button></td>
+      `;
+
+      document.getElementById('customerTableBody').appendChild(newRow);
+      saveCustomerData();
+
+      document.getElementById('name').value = '';
+      document.getElementById('phoneNumber').value = '';
+      document.getElementById('address').value = '';
+      document.getElementById('billingDetails').value = '';
+      document.getElementById('internetPlan').value = '';
+    }
+
+    function editCustomer(button) {
+      var row = button.parentNode.parentNode;
+      var cells = row.getElementsByTagName('td');
+
+      document.getElementById('name').value = cells[0].innerText;
+      document.getElementById('phoneNumber').value = cells[1].innerText;
+      document.getElementById('address').value = cells[2].innerText;
+      document.getElementById('billingDetails').value = cells[3].innerText;
+      document.getElementById('internetPlan').value = cells[4].innerText;
+
+      row.parentNode.removeChild(row);
+      saveCustomerData();
+    }
+
+    function saveCustomerData() {
+      var existingData = JSON.parse(localStorage.getItem('customerData')) || [];
+      var newData = [];
+      var tableRows = document.getElementById('customerTableBody').getElementsByTagName('tr');
+      for (var i = 0; i < tableRows.length; i++) {
+        var rowCells = tableRows[i].getElementsByTagName('td');
+        var rowData = {
+          name: rowCells[0].innerText,
+          phoneNumber: rowCells[1].innerText,
+          address: rowCells[2].innerText,
+          billingDetails: rowCells[3].innerText,
+          internetPlan: rowCells[4].innerText,
+          email: rowCells[5].innerText,
+          registrationTime: rowCells[6].innerText,
+        };
+        newData.push(rowData);
+      }
+
+      existingData = existingData.concat(newData);
+      localStorage.setItem('customerData', JSON.stringify(existingData));
+    }
+
+    function loadCustomerData() {
+      var existingData = JSON.parse(localStorage.getItem('customerData')) || [];
+      var tableBody = document.getElementById('customerTableBody');
+      for (var i = 0; i < existingData.length; i++) {
+        var rowData = existingData[i];
+        var newRow = document.createElement('tr');
+        newRow.innerHTML = `
+          <td>${rowData.name}</td>
+          <td>${rowData.phoneNumber}</td>
+          <td>${rowData.address}</td>
+          <td>${rowData.billingDetails}</td>
+          <td>${rowData.internetPlan}</td>
+          <td>${rowData.email}</td>
+          <td>${rowData.registrationTime}</td>
+          <td><button onclick="editCustomer(this)">Edit</button></td>
+        `;
+        tableBody.appendChild(newRow);
+      }
+    }
+  </script>
+</body>
+
+</html>
